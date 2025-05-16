@@ -7,6 +7,7 @@ const router = useRouter()
 const route = useRoute()
 const notificacoes = ref([])
 const temNotificacao = ref(false)
+const isAdmin = ref(false)
 
 const goBack = () => {
   router.back()
@@ -24,6 +25,9 @@ const carregarNotificacoes = async () => {
     const user = JSON.parse(localStorage.getItem('user'))
 
     if (!token || !user) return
+
+    // Verifica se é admin
+    isAdmin.value = user?.role === 'admin'
 
     const response = await axios.get('http://127.0.0.1:8000/Notificacao/', {
       headers: { Authorization: `Bearer ${token}` }
@@ -51,11 +55,13 @@ const irParaNotificacoes = () => {
 onMounted(carregarNotificacoes)
 </script>
 
-
 <template>
   <nav>
     <div class="links">
-      <NuxtLink class="nav-link" to="trocaGuarda">Troca de Guarda</NuxtLink>
+      <!-- Botão condicional -->
+      <NuxtLink v-if="!isAdmin" class="nav-link" to="trocaGuarda">Troca de Guarda</NuxtLink>
+      <NuxtLink v-else class="nav-link" to="/admin/CadastroUsuario">Usuário</NuxtLink>
+
       <button class="nav-link" @click="goBack">Voltar</button>
       <NuxtLink class="nav-link" to="calendar">Calendário</NuxtLink>
       <button class="nav-link" @click="irParaNotificacoes">
