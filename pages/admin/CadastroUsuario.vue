@@ -105,6 +105,7 @@ function editarUsuario(usuario) {
   delete usuarioEditavel.groups;
   delete usuarioEditavel.user_permissions;
   novoUsuario.value = usuarioEditavel;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function limparFormulario() {
@@ -152,7 +153,10 @@ async function deletarUsuario(id) {
   }
 }
 
-watch(termoBusca, carregarUsuarios);
+watch(termoBusca, () => {
+  carregarUsuarios();
+});
+
 onMounted(carregarUsuarios);
 
 function onFileChange(event) {
@@ -162,103 +166,216 @@ function onFileChange(event) {
 
 
 <template>
-  <div>
+  <div class="tela-usuario">
     <Navbar />
 
-    <div class="p-4 max-w-6xl mx-auto">
-      <h1 class="text-2xl font-bold mb-4">Cadastro de Usuário</h1>
+    <div class="container">
+      <h1 class="titulo">Cadastro de Usuário</h1>
 
-      <div class="grid grid-cols-2 gap-4 mb-6">
-        <h2 class="text-lg font-semibold mb-2" v-if="editandoId">
-          Editando usuário: {{ novoUsuario.nome_completo }}
-        </h2>
-        <input v-model="novoUsuario.nome_completo" placeholder="Nome Completo" class="input" />
-        <input v-model="novoUsuario.nome_guerra" placeholder="Nome de Guerra" class="input" />
-        <input v-model="novoUsuario.numero_atirador" placeholder="Número Atirador" type="number" class="input" />
-        <input v-model="novoUsuario.cpf" placeholder="CPF" class="input" />
-        <input v-model="novoUsuario.ra" placeholder="R.A" class="input" />
-        <input v-model="novoUsuario.email" placeholder="Email" type="email" class="input" />
-        <input v-model="novoUsuario.password" placeholder="Senha" type="password" class="input" />
-        <input v-model="novoUsuario.data_nascimento" type="date" class="input" />
-        <select v-model="novoUsuario.sexo" class="input">
-          <option value="M">Masculino</option>
-          <option value="F">Feminino</option>
-        </select>
-        <input v-model="novoUsuario.tipo_sanguineo" placeholder="Tipo Sanguíneo" class="input" />
-        <input v-model="novoUsuario.pai" placeholder="Pai" class="input" />
-        <input v-model="novoUsuario.mae" placeholder="Mãe" class="input" />
-        <input v-model="novoUsuario.escolaridade" placeholder="Escolaridade" class="input" />
-        <input v-model="novoUsuario.trabalho" placeholder="Trabalho" class="input" />
-        <input v-model="novoUsuario.rua" placeholder="Rua" class="input" />
-        <input v-model="novoUsuario.bairro" placeholder="Bairro" class="input" />
-        <input v-model="novoUsuario.cidade" placeholder="Cidade" class="input" />
-        <input v-model="novoUsuario.numero_casa" placeholder="Número da Casa" class="input" />
-        <input v-model="novoUsuario.complemento" placeholder="Complemento" class="input" />
-        <input v-model="novoUsuario.cep" placeholder="CEP" class="input" />
-        <select v-model="novoUsuario.patente" class="input">
-          <option value="SB">Subtenente</option>
-          <option value="A">Atirador</option>
-          <option value="S">Sargento</option>
-          <option value="C">Cabo</option>
-        </select>
-        <select v-model="novoUsuario.comandante" class="input">
-          <option value="S">Comandante</option>
-          <option value="N">Não comandante</option>
-        </select>
-        <input type="file" @change="onFileChange" />
+      <div class="formulario">
+        <h2 v-if="editandoId" class="editando">Editando: {{ novoUsuario.nome_completo }}</h2>
+
+        <div class="grid">
+          <input v-model="novoUsuario.nome_completo" placeholder="Nome Completo" class="input" />
+          <input v-model="novoUsuario.nome_guerra" placeholder="Nome de Guerra" class="input" />
+          <input v-model="novoUsuario.numero_atirador" placeholder="Número Atirador" class="input" />
+          <input v-model="novoUsuario.cpf" placeholder="CPF" class="input" />
+          <input v-model="novoUsuario.ra" placeholder="RA" class="input" />
+          <input v-model="novoUsuario.email" placeholder="Email" class="input" />
+          <input v-model="novoUsuario.password" type="password" placeholder="Senha" class="input" />
+          <input v-model="novoUsuario.data_nascimento" type="date" class="input" />
+          <select v-model="novoUsuario.sexo" class="input">
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+          <input v-model="novoUsuario.tipo_sanguineo" placeholder="Tipo Sanguíneo" class="input" />
+          <input v-model="novoUsuario.pai" placeholder="Pai" class="input" />
+          <input v-model="novoUsuario.mae" placeholder="Mãe" class="input" />
+          <input v-model="novoUsuario.escolaridade" placeholder="Escolaridade" class="input" />
+          <input v-model="novoUsuario.trabalho" placeholder="Trabalho" class="input" />
+          <input v-model="novoUsuario.rua" placeholder="Rua" class="input" />
+          <input v-model="novoUsuario.bairro" placeholder="Bairro" class="input" />
+          <input v-model="novoUsuario.cidade" placeholder="Cidade" class="input" />
+          <input v-model="novoUsuario.numero_casa" placeholder="Número da Casa" class="input" />
+          <input v-model="novoUsuario.complemento" placeholder="Complemento" class="input" />
+          <input v-model="novoUsuario.cep" placeholder="CEP" class="input" />
+          <select v-model="novoUsuario.patente" class="input">
+            <option value="SB">Subtenente</option>
+            <option value="A">Atirador</option>
+            <option value="S">Sargento</option>
+            <option value="C">Cabo</option>
+          </select>
+          <select v-model="novoUsuario.comandante" class="input">
+            <option value="S">Comandante</option>
+            <option value="N">Não comandante</option>
+          </select>
+          <input type="file" @change="onFileChange" class="input-file" />
+        </div>
+
+        <div class="botoes">
+          <button @click="cadastrarOuAtualizarUsuario" class="btn-salvar">
+            {{ editandoId ? 'Salvar' : 'Cadastrar' }}
+          </button>
+          <button v-if="editandoId" @click="limparFormulario" class="btn-cancelar">Cancelar</button>
+        </div>
       </div>
 
-      <button @click="cadastrarOuAtualizarUsuario" class="bg-blue-600 text-white px-4 py-2 rounded mr-2">
-        {{ editandoId ? "Salvar Alterações" : "Cadastrar" }}
-      </button>
-      <button v-if="editandoId" @click="limparFormulario" class="bg-gray-500 text-white px-4 py-2 rounded">
-        Cancelar
-      </button>
-
-      <div class="mt-10">
-        <h2 class="text-xl font-semibold mb-2">Buscar Usuário</h2>
-        <input
-          v-model="termoBusca"
-          placeholder="Buscar por nome, CPF, nome de guerra..."
-          class="input mb-4 w-full"
-        />
-
-        <table class="w-full text-left border text-sm">
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="p-2 border">ID</th>
-              <th class="p-2 border">Número</th>
-              <th class="p-2 border">Nome</th>
-              <th class="p-2 border">Guerra</th>
-              <th class="p-2 border">CPF</th>
-              <th class="p-2 border">Email</th>
-              <th class="p-2 border">Comandante</th>
-              <th class="p-2 border">Patente</th>
-              <th class="p-2 border">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in usuarios" :key="user.id" class="hover:bg-gray-100">
-              <td class="p-2 border">{{ user.id }}</td>
-              <td class="p-2 border">{{ user.numero_atirador }}</td>
-              <td class="p-2 border">{{ user.nome_completo }}</td>
-              <td class="p-2 border">{{ user.nome_guerra }}</td>
-              <td class="p-2 border">{{ user.cpf }}</td>
-              <td class="p-2 border">{{ user.email }}</td>
-              <td class="p-2 border">{{ user.comandante }}</td>
-              <td class="p-2 border">{{ user.patente }}</td>
-              <td class="p-2 border">
-                <button @click="editarUsuario(user)" class="text-blue-600 hover:underline">
-                  Editar
-                </button>
-                <button @click="deletarUsuario(user.id)" class="text-red-600 hover:underline ml-2">
-                  Excluir
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="busca">
+        <h2 class="subtitulo">Buscar Usuário</h2>
+        <input v-model="termoBusca" placeholder="Buscar por nome de guerra" class="input busca-input" />
       </div>
+
+      <table class="tabela">
+        <thead>
+          <tr>
+            
+            <th>Número</th>
+            <th>Nome</th>
+            <th>Guerra</th>
+            <th>CPF</th>
+            <th>Email</th>
+            <th>Comandante</th>
+            <th>Patente</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in usuarios" :key="user.id">
+            
+            <td>{{ user.numero_atirador }}</td>
+            <td>{{ user.nome_completo }}</td>
+            <td>{{ user.nome_guerra }}</td>
+            <td>{{ user.cpf }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.comandante }}</td>
+            <td>{{ user.patente }}</td>
+            <td>
+              <button @click="editarUsuario(user)" class="acao editar">Editar</button>
+              <button @click="deletarUsuario(user.id)" class="acao excluir">Excluir</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
+
+<style scoped>
+.tela-usuario {
+  background: linear-gradient(135deg, #1a3e2a 50%, #f9d54c 50%);
+  min-height: 100vh;
+  color: #1a3e2a;
+  
+}
+
+.container {
+  background-color: #fff;
+  border-radius: 12px;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+
+}
+
+.titulo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #1a3e2a;
+  text-align: center;
+}
+
+.editando {
+  color: #c47f00;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.input-file {
+  margin-top: 10px;
+}
+
+.botoes {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.btn-salvar {
+  background-color: #1a3e2a;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-cancelar {
+  background-color: #ccc;
+  color: #333;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.busca {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.subtitulo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.tabela th,
+.tabela td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.tabela th {
+  background-color: #e3e3e3;
+}
+
+.acao {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.editar {
+  color: #1a3e2a;
+}
+
+.excluir {
+  color: #c0392b;
+  margin-left: 8px;
+}
+</style>

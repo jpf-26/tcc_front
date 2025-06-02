@@ -993,23 +993,6 @@ async function errorHandler(error, event) {
   // H3 will handle fallback
 }
 
-const script = `
-if (!window.__NUXT_DEVTOOLS_TIME_METRIC__) {
-  Object.defineProperty(window, '__NUXT_DEVTOOLS_TIME_METRIC__', {
-    value: {},
-    enumerable: false,
-    configurable: true,
-  })
-}
-window.__NUXT_DEVTOOLS_TIME_METRIC__.appInit = Date.now()
-`;
-
-const _XgFG0JFW3vefLhyGfUjruEsdmBNO0LBWZonwBVmoSU8 = (function(nitro) {
-  nitro.hooks.hook("render:html", (htmlContext) => {
-    htmlContext.head.push(`<script>${script}<\/script>`);
-  });
-});
-
 const rootDir = "C:/Users/NItro/Desktop/frontend-main";
 
 const appHead = {"meta":[{"name":"viewport","content":"width=device-width, initial-scale=1"},{"charset":"utf-8"}],"link":[],"style":[],"script":[],"noscript":[]};
@@ -1099,8 +1082,7 @@ function onConsoleLog(callback) {
 }
 
 const plugins = [
-  _XgFG0JFW3vefLhyGfUjruEsdmBNO0LBWZonwBVmoSU8,
-_f89Bl6H48Y2q9sIxThLWLchAmgaGJ72vGivEkFQuYM
+  _f89Bl6H48Y2q9sIxThLWLchAmgaGJ72vGivEkFQuYM
 ];
 
 const _lazy_Mul56S = () => Promise.resolve().then(function () { return renderer$1; });

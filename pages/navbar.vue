@@ -2,6 +2,8 @@
 import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import brasao from '@/assets/brasao_tg.png';
+
 
 const router = useRouter()
 const route = useRoute()
@@ -9,9 +11,6 @@ const notificacoes = ref([])
 const temNotificacao = ref(false)
 const isAdmin = ref(false)
 
-const goBack = () => {
-  router.back()
-}
 
 const logout = () => {
   localStorage.removeItem('accessToken')
@@ -57,13 +56,14 @@ onMounted(carregarNotificacoes)
 
 <template>
   <nav>
+    <img :src="brasao" alt="Brasão TG" class="logo-tg" />
     <div class="links">
-      <!-- Botão condicional -->
-      <NuxtLink v-if="!isAdmin" class="nav-link" to="trocaGuarda">Troca de Guarda</NuxtLink>
+      <NuxtLink v-if="!isAdmin" class="nav-link" to="/users/">Home</NuxtLink>
+      <NuxtLink v-else class="nav-link" to="/admin/">Home</NuxtLink>
+       <NuxtLink v-if="!isAdmin" class="nav-link" to="/users/trocaGuarda">Troca de Guarda</NuxtLink>
       <NuxtLink v-else class="nav-link" to="/admin/CadastroUsuario">Usuário</NuxtLink>
+        <NuxtLink class="nav-link" to="calendar">Calendário</NuxtLink>
 
-      <button class="nav-link" @click="goBack">Voltar</button>
-      <NuxtLink class="nav-link" to="calendar">Calendário</NuxtLink>
       <button class="nav-link" @click="irParaNotificacoes">
         Notificações
         <span v-if="temNotificacao" class="dot"></span>
@@ -78,44 +78,50 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #dce6e9;
-  padding: 10px 20px;
-  border-bottom: 2px solid #ccc;
+  background-color: #1a3e2a;
+  padding: 12px 30px;
+  border-bottom: 4px solid #c9a12f;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.logo-tg {
+  height: 42px;
+  width: auto;
 }
 
 .links {
   display: flex;
-  gap: 20px;
   align-items: center;
-  margin-left: auto;
+  gap: 20px;
 }
 
 .nav-link {
-  text-decoration: none;
-  color: #28a745;
-  font-weight: bold;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #fff;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px 10px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
   position: relative;
+  text-decoration: none;
 }
 
 .nav-link:hover {
-  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #f9d54c;
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   background-color: red;
   border-radius: 50%;
   position: absolute;
-  top: 0px;
-  right: -5px;
+  top: 4px;
+  right: 4px;
 }
 </style>
+

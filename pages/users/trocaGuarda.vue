@@ -1,3 +1,80 @@
+<template>
+  <div class="tela-troca">
+    <Navbar />
+
+    <div class="conteudo">
+      <!-- Formulário de Solicitação -->
+      <div class="bloco">
+        <h2 class="titulo-secao">Solicitar Troca de Guarda</h2>
+        <form @submit.prevent="enviarSolicitacao" class="formulario">
+          <label>
+            Nome de Guerra do Substituto:
+            <input v-model="substituto" class="input" required />
+          </label>
+
+          <label>
+            Data da Sua Guarda:
+            <input v-model="dataSolicitante" type="date" class="input" required />
+          </label>
+
+          <label>
+            Data da Guarda do Substituto:
+            <input v-model="dataSubstituto" type="date" class="input" required />
+          </label>
+
+          <label>
+            Motivo:
+            <textarea v-model="motivo" class="input" rows="2" />
+          </label>
+
+          <button type="submit" :disabled="loading" class="btn-verde">
+            Enviar Solicitação
+          </button>
+
+          <p v-if="mensagem" :class="['mensagem', mensagemErro ? 'erro' : 'sucesso']">
+            {{ mensagem }}
+          </p>
+        </form>
+      </div>
+
+      <!-- Lista de Trocas -->
+      <div class="bloco">
+        <h2 class="titulo-secao">Trocas Pendentes</h2>
+
+        <div v-if="loading">Carregando trocas...</div>
+        <div v-else-if="erro" class="erro">{{ erro }}</div>
+        <div v-else>
+          <div v-if="trocasPendentes.length === 0" class="text-gray-600">
+            Nenhuma troca pendente para você.
+          </div>
+          <ul v-else class="lista-trocas">
+            <li
+              v-for="troca in trocasPendentes"
+              :key="troca.id_troca"
+              class="item-troca"
+            >
+              <p><strong>Motivo:</strong> {{ troca.motivo }}</p>
+              <p><strong>Solicitante:</strong> {{ troca.solicitante }}</p>
+              <p><strong>Substituto:</strong> {{ troca.substituto }}</p>
+              <p><strong>Data do solicitante:</strong> {{ new Date(troca.data_guarda_solicitante).toLocaleDateString('pt-BR') }}</p>
+              <p><strong>Data do substituto:</strong> {{ new Date(troca.data_guarda_substituto).toLocaleDateString('pt-BR') }}</p>
+
+              <div v-if="usuarioLogado?.nome_guerra === troca.substituto" class="acoes">
+                <button @click="aceitarTroca(troca.id_troca)" class="btn-verde">Aceitar</button>
+                <button @click="recusarTroca(troca.id_troca)" class="btn-vermelho">Recusar</button>
+              </div>
+
+              <div v-else-if="usuarioLogado?.nome_guerra === troca.solicitante" class="aguardando">
+                Aguardando resposta do substituto.
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { onMounted, ref } from 'vue'
 import Navbar from '~/pages/navbar.vue'
@@ -26,7 +103,6 @@ const fetchTrocas = async () => {
     }
 
     const headers = { Authorization: `Bearer ${accessToken}` }
-
     const response = await axios.get('http://127.0.0.1:8000/trocas_detalhadas/', { headers })
 
     trocasPendentes.value = response.data.filter(
@@ -56,9 +132,7 @@ const enviarSolicitacao = async () => {
         motivo: motivo.value
       },
       {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       }
     )
     mensagem.value = 'Solicitação enviada com sucesso!'
@@ -103,15 +177,12 @@ const aceitarTroca = async (id_troca) => {
 const recusarTroca = async (id_troca) => {
   try {
     const token = localStorage.getItem('accessToken')
-
     const response = await axios.post(
       'http://127.0.0.1:8000/rejeitar-troca/',
       { id_troca },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-
     alert(response.data.mensagem)
-
     await fetchTrocas()
   } catch (err) {
     alert('Erro ao recusar troca: ' + (err.response?.data?.erro || err.message))
@@ -121,74 +192,113 @@ const recusarTroca = async (id_troca) => {
 onMounted(fetchTrocas)
 </script>
 
-<template>
-  <div>
-    <Navbar />
-    <div class="p-4 flex flex-col items-center gap-8">
-      <!-- Solicitação de Troca -->
-      <div class="bg-gray-100 p-6 rounded shadow w-full max-w-xl">
-        <h2 class="text-lg font-semibold mb-4">Solicitar Troca de Guarda</h2>
-        <form @submit.prevent="enviarSolicitacao" class="flex flex-col gap-4">
-          <div>
-            <label>Nome de Guerra do Substituto:</label>
-            <input v-model="substituto" class="border px-3 py-1 rounded w-full" required />
-          </div>
-          <div>
-            <label>Data da Sua Guarda:</label>
-            <input v-model="dataSolicitante" type="date" class="border px-3 py-1 rounded w-full" required />
-          </div>
-          <div>
-            <label>Data da Guarda do Substituto:</label>
-            <input v-model="dataSubstituto" type="date" class="border px-3 py-1 rounded w-full" required />
-          </div>
-          <div>
-            <label>Motivo:</label>
-            <textarea v-model="motivo" class="border px-3 py-1 rounded w-full" />
-          </div>
-          <button type="submit" :disabled="loading" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
-            Enviar Solicitação
-          </button>
-        </form>
-        <p v-if="mensagem" :class="['mt-4 font-semibold', mensagemErro ? 'text-red-600' : 'text-green-600']">
-          {{ mensagem }}
-        </p>
-      </div>
-
-      <!-- Trocas Pendentes -->
-      <div class="w-full max-w-3xl">
-        <h1 class="text-xl font-bold mb-4">Trocas Pendentes</h1>
-        <div v-if="loading">Carregando trocas...</div>
-        <div v-else-if="erro" class="text-red-500">{{ erro }}</div>
-        <div v-else>
-          <div v-if="trocasPendentes.length === 0">Nenhuma troca pendente para você.</div>
-          <ul v-else class="space-y-4">
-            <li v-for="troca in trocasPendentes" :key="troca.id_troca" class="p-4 border rounded shadow">
-              <p><strong>Motivo:</strong> {{ troca.motivo }}</p>
-              <p><strong>Solicitante:</strong> {{ troca.solicitante }}</p>
-              <p><strong>Substituto:</strong> {{ troca.substituto }}</p>
-              <p><strong>Data da guarda do solicitante:</strong> {{ new Date(troca.data_guarda_solicitante).toLocaleDateString('pt-BR') }}</p>
-              <p><strong>Data da guarda do substituto:</strong> {{ new Date(troca.data_guarda_substituto).toLocaleDateString('pt-BR') }}</p>
-              
-              <!-- Apenas o substituto vê os botões -->
-              <div class="mt-2" v-if="usuarioLogado?.nome_guerra === troca.substituto">
-                <button @click="aceitarTroca(troca.id_troca)" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600">Aceitar</button>
-                <button @click="recusarTroca(troca.id_troca)" class="ml-2 bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600">Recusar</button>
-              </div>
-
-              <!-- Opcional: Texto para o solicitante -->
-              <div class="mt-2 text-gray-500 italic" v-else-if="usuarioLogado?.nome_guerra === troca.solicitante">
-                Aguardando resposta do substituto.
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <style scoped>
-button {
-  transition: all 0.2s;
+.tela-troca {
+  background: linear-gradient(135deg, #1a3e2a 50%, #f9d54c 50%);
+  min-height: 100vh;
+  color: #1a3e2a;
+}
+
+.conteudo {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.bloco {
+  margin-bottom: 40px;
+}
+
+.titulo-secao {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #1a3e2a;
+  text-align: center;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.mensagem {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.sucesso {
+  color: #2d7a46;
+}
+
+.erro {
+  color: #c0392b;
+}
+
+.lista-trocas {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.item-troca {
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background-color: #f9fafb;
+}
+
+.acoes {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.aguardando {
+  margin-top: 10px;
+  color: #666;
+  font-style: italic;
+}
+
+.btn-verde {
+  background-color: #1a3e2a;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-verde:hover {
+  background-color: #14532d;
+}
+
+.btn-vermelho {
+  background-color: #c0392b;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-vermelho:hover {
+  background-color: #992d22;
 }
 </style>
