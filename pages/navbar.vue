@@ -63,11 +63,13 @@ onMounted(carregarNotificacoes)
        <NuxtLink v-if="!isAdmin" class="nav-link" to="/users/trocaGuarda">Troca de Guarda</NuxtLink>
       <NuxtLink v-else class="nav-link" to="/admin/CadastroUsuario">Usuário</NuxtLink>
         <NuxtLink class="nav-link" to="calendar">Calendário</NuxtLink>
+        
 
       <button class="nav-link" @click="irParaNotificacoes">
         Notificações
         <span v-if="temNotificacao" class="dot"></span>
       </button>
+      <NuxtLink class="nav-link" to="Perfil">Perfil</NuxtLink>
       <button class="nav-link" @click="logout">Logout</button>
     </div>
   </nav>

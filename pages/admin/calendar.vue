@@ -115,7 +115,11 @@ const fetchEvents = async () => {
     const feriados = feriadosRes.data
 
     const eventosGuardas = guardas.map(g => ({
-      title: `Atiradores:\n #${g.atirador_1}\n #${g.atirador_2}\n #${g.atirador_3}\nComandante: #${g.comandante}`,
+      title: `Atiradores:\n ${
+  [g.atirador_1, g.atirador_2, g.atirador_3]
+    .map(a => a ? `#${a}` : '#VAGO')
+    .join('\n')
+}\nComandante: ${g.comandante ? `#${g.comandante}` : '#VAGO'}`,
       start: g["data-ref"].split('/').reverse().join('-'),
       color: '#1a3e2a'
     }))
