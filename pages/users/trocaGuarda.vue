@@ -1,9 +1,7 @@
 <template>
   <div class="tela-troca">
     <Navbar />
-
     <div class="conteudo">
-      <!-- Formulário de Solicitação -->
       <div class="bloco">
         <h2 class="titulo-secao">Solicitar Troca de Guarda</h2>
         <form @submit.prevent="enviarSolicitacao" class="formulario">
@@ -11,36 +9,28 @@
             Nome de Guerra do Substituto:
             <input v-model="substituto" class="input" required />
           </label>
-
           <label>
             Data da Sua Guarda:
             <input v-model="dataSolicitante" type="date" class="input" required />
           </label>
-
           <label>
             Data da Guarda do Substituto:
             <input v-model="dataSubstituto" type="date" class="input" required />
           </label>
-
           <label>
             Motivo:
             <textarea v-model="motivo" class="input" rows="2" />
           </label>
-
           <button type="submit" :disabled="loading" class="btn-verde">
             Enviar Solicitação
           </button>
-
           <p v-if="mensagem" :class="['mensagem', mensagemErro ? 'erro' : 'sucesso']">
             {{ mensagem }}
           </p>
         </form>
       </div>
-
-      <!-- Lista de Trocas -->
       <div class="bloco">
         <h2 class="titulo-secao">Trocas Pendentes</h2>
-
         <div v-if="loading">Carregando trocas...</div>
         <div v-else-if="erro" class="erro">{{ erro }}</div>
         <div v-else>
@@ -58,12 +48,10 @@
               <p><strong>Substituto:</strong> {{ troca.substituto }}</p>
               <p><strong>Data do solicitante:</strong> {{ new Date(troca.data_guarda_solicitante).toLocaleDateString('pt-BR') }}</p>
               <p><strong>Data do substituto:</strong> {{ new Date(troca.data_guarda_substituto).toLocaleDateString('pt-BR') }}</p>
-
               <div v-if="usuarioLogado?.nome_guerra === troca.substituto" class="acoes">
                 <button @click="aceitarTroca(troca.id_troca)" class="btn-verde">Aceitar</button>
                 <button @click="recusarTroca(troca.id_troca)" class="btn-vermelho">Recusar</button>
               </div>
-
               <div v-else-if="usuarioLogado?.nome_guerra === troca.solicitante" class="aguardando">
                 Aguardando resposta do substituto.
               </div>
@@ -135,7 +123,7 @@ const enviarSolicitacao = async () => {
         headers: { Authorization: `Bearer ${token}` }
       }
     )
-    mensagem.value = 'Solicitação enviada com sucesso!'
+    mensagem.value = '📨 Solicitação enviada com sucesso!'
     mensagemErro.value = false
     substituto.value = ''
     dataSolicitante.value = ''
@@ -151,41 +139,48 @@ const enviarSolicitacao = async () => {
 }
 
 const aceitarTroca = async (id_troca) => {
+  mensagem.value = ''
+  mensagemErro.value = false
   try {
     const token = localStorage.getItem('accessToken')
 
-    const aceitarResponse = await axios.post(
+    await axios.post(
       'http://127.0.0.1:8000/aceitar-troca/',
       { id_troca },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    alert(aceitarResponse.data.mensagem)
 
-    const executarResponse = await axios.put(
+    await axios.put(
       'http://127.0.0.1:8000/executar-troca/',
       { id_troca },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    alert(executarResponse.data.mensagem)
 
+    mensagem.value = '✅ Troca de guarda aceita e executada com sucesso.'
+    mensagemErro.value = false
     await fetchTrocas()
   } catch (err) {
-    alert('Erro ao aceitar ou executar troca: ' + (err.response?.data?.erro || err.message))
+    mensagem.value = err.response?.data?.erro || 'Erro ao aceitar ou executar troca.'
+    mensagemErro.value = true
   }
 }
 
 const recusarTroca = async (id_troca) => {
+  mensagem.value = ''
+  mensagemErro.value = false
   try {
     const token = localStorage.getItem('accessToken')
-    const response = await axios.post(
+    await axios.post(
       'http://127.0.0.1:8000/rejeitar-troca/',
       { id_troca },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    alert(response.data.mensagem)
+    mensagem.value = '❌ Troca recusada com sucesso.'
+    mensagemErro.value = false
     await fetchTrocas()
   } catch (err) {
-    alert('Erro ao recusar troca: ' + (err.response?.data?.erro || err.message))
+    mensagem.value = err.response?.data?.erro || 'Erro ao recusar troca.'
+    mensagemErro.value = true
   }
 }
 

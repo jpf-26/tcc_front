@@ -2,6 +2,8 @@
 import Navbar from "~/pages/navbar.vue";
 import { ref, onMounted, watch } from "vue";
 import axios from "axios";
+import { nextTick } from 'vue'
+
 
 const API_URL_LISTAR = "http://localhost:8000/usuario/";
 const API_URL_CADASTRAR = "http://127.0.0.1:8000/cadastrar_usuario/";
@@ -9,6 +11,19 @@ const API_URL_CADASTRAR = "http://127.0.0.1:8000/cadastrar_usuario/";
 const usuarios = ref([]);
 const termoBusca = ref("");
 const editandoId = ref(null);
+
+// Notificação amigável
+const mensagem = ref("");
+const tipoMensagem = ref(""); // 'sucesso' | 'erro'
+
+function exibirMensagem(texto, tipo = "sucesso") {
+  mensagem.value = texto;
+  tipoMensagem.value = tipo;
+  setTimeout(() => {
+    mensagem.value = "";
+    tipoMensagem.value = "";
+  }, 4000);
+}
 
 const novoUsuario = ref({
   nome_completo: "",
@@ -49,7 +64,7 @@ async function carregarUsuarios() {
     });
     usuarios.value = data.results || data;
   } catch (error) {
-    alert("Erro ao carregar usuários: " + (error.response?.data || error.message));
+    exibirMensagem("Erro ao carregar usuários.", "erro");
   }
 }
 
@@ -63,7 +78,6 @@ async function cadastrarOuAtualizarUsuario() {
 
     for (const key in usuarioCopia) {
       if (key === "foto") {
-        // Envia a foto só se for um novo arquivo (não string de URL)
         if (usuarioCopia.foto instanceof File) {
           formData.append("foto", usuarioCopia.foto);
         }
@@ -76,26 +90,55 @@ async function cadastrarOuAtualizarUsuario() {
 
     if (editandoId.value) {
       await axios.put(`${API_URL_LISTAR}${editandoId.value}/`, formData, config);
-      alert("Usuário atualizado com sucesso!");
+      exibirMensagem("Usuário atualizado com sucesso!", "sucesso");
     } else {
       await axios.post(API_URL_CADASTRAR, formData, config);
-      alert("Usuário cadastrado com sucesso!");
+      exibirMensagem("Usuário cadastrado com sucesso!", "sucesso");
     }
 
     await carregarUsuarios();
     limparFormulario();
   } catch (error) {
-    let msg = "Erro ao cadastrar/editar usuário.";
-    if (error.response?.data) {
-      if (typeof error.response.data === "string") {
-        msg += " " + error.response.data;
-      } else if (typeof error.response.data === "object") {
-        msg += " " + JSON.stringify(error.response.data);
-      }
-    } else {
-      msg += " " + error.message;
+    let mensagens = [];
+
+if (error.response?.data && typeof error.response.data === "object") {
+  for (const campo in error.response.data) {
+    const erros = error.response.data[campo];
+    if (Array.isArray(erros)) {
+      erros.forEach(erro => {
+        mensagens.push(`${formatarCampo(campo)}: ${erro}`);
+      });
     }
-    alert(msg);
+  }
+} else if (typeof error.response?.data === "string") {
+  mensagens.push(error.response.data);
+} else {
+  mensagens.push(error.message);
+}
+
+exibirMensagem("Erro ao cadastrar/editar usuário:\n" + mensagens.join("\n"), "erro");
+
+
+function formatarCampo(campo) {
+  const traducoes = {
+    nome_completo: "Nome Completo",
+    nome_guerra: "Nome de Guerra",
+    numero_atirador: "Número do Atirador",
+    cpf: "CPF",
+    email: "E-mail",
+    password: "Senha",
+    rua: "Rua",
+    bairro: "Bairro",
+    cidade: "Cidade",
+    numero_casa: "Número da Casa",
+    cep: "CEP",
+    data_nascimento: "Data de Nascimento",
+    foto: "Foto",
+    ra: "RA"
+    
+  };
+  return traducoes[campo] || campo;
+}
   }
 }
 
@@ -141,17 +184,42 @@ function limparFormulario() {
   };
 }
 
-async function deletarUsuario(id) {
-  if (confirm("Tem certeza que deseja apagar este usuário?")) {
-    try {
-      await axios.delete(`http://localhost:8000/deletar_usuario/${id}/`);
-      alert("Usuário apagado com sucesso!");
-      await carregarUsuarios();
-    } catch (error) {
-      alert("Erro ao deletar usuário: " + (error.response?.data || error.message));
-    }
-  }
+const usuarioASerDeletado = ref(null);
+const mostrarConfirmacao = ref(false);
+
+function confirmarExclusao(usuario) {
+  usuarioASerDeletado.value = usuario;
+  mostrarConfirmacao.value = true;
 }
+
+async function deletarUsuarioConfirmado() {
+  try {
+    await axios.delete(`http://localhost:8000/deletar_usuario/${usuarioASerDeletado.value.id}/`);
+    await carregarUsuarios();
+  } catch (error) {
+    let erroMsg = "Erro ao deletar usuário.";
+    if (error.response?.data) {
+      erroMsg += typeof error.response.data === "string"
+        ? ` ${error.response.data}`
+        : ` ${JSON.stringify(error.response.data)}`;
+    } else {
+      erroMsg += " " + error.message;
+    }
+    exibirMensagem(erroMsg, "erro");
+    return;
+  } finally {
+    mostrarConfirmacao.value = false;
+    usuarioASerDeletado.value = null;
+  }
+
+  await nextTick();
+  window.scrollTo({ top: 0, behavior: 'smooth' }); // 👈 aqui sobe a tela
+  exibirMensagem("Usuário apagado com sucesso!", "sucesso");
+}
+
+
+
+
 
 watch(termoBusca, () => {
   carregarUsuarios();
@@ -165,16 +233,17 @@ function onFileChange(event) {
 </script>
 
 
+
 <template>
   <div class="tela-usuario">
     <Navbar />
-
     <div class="container">
+    <div v-if="mensagem" :class="['mensagem', tipoMensagem]">
+       {{ mensagem }}
+    </div>
       <h1 class="titulo">Cadastro de Usuário</h1>
-
       <div class="formulario">
         <h2 v-if="editandoId" class="editando">Editando: {{ novoUsuario.nome_completo }}</h2>
-
         <div class="grid">
           <input v-model="novoUsuario.nome_completo" placeholder="Nome Completo" class="input" />
           <input v-model="novoUsuario.nome_guerra" placeholder="Nome de Guerra" class="input" />
@@ -211,7 +280,6 @@ function onFileChange(event) {
           </select>
           <input type="file" @change="onFileChange" class="input-file" />
         </div>
-
         <div class="botoes">
           <button @click="cadastrarOuAtualizarUsuario" class="btn-salvar">
             {{ editandoId ? 'Salvar' : 'Cadastrar' }}
@@ -219,16 +287,13 @@ function onFileChange(event) {
           <button v-if="editandoId" @click="limparFormulario" class="btn-cancelar">Cancelar</button>
         </div>
       </div>
-
       <div class="busca">
         <h2 class="subtitulo">Buscar Usuário</h2>
         <input v-model="termoBusca" placeholder="Buscar por nome de guerra" class="input busca-input" />
       </div>
-
       <table class="tabela">
         <thead>
-          <tr>
-            
+          <tr>  
             <th>Número</th>
             <th>Nome</th>
             <th>Guerra</th>
@@ -240,8 +305,7 @@ function onFileChange(event) {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in usuarios" :key="user.id">
-            
+          <tr v-for="user in usuarios" :key="user.id"> 
             <td>{{ user.numero_atirador }}</td>
             <td>{{ user.nome_completo }}</td>
             <td>{{ user.nome_guerra }}</td>
@@ -251,13 +315,22 @@ function onFileChange(event) {
             <td>{{ user.patente }}</td>
             <td>
               <button @click="editarUsuario(user)" class="acao editar">Editar</button>
-              <button @click="deletarUsuario(user.id)" class="acao excluir">Excluir</button>
+              <button @click="confirmarExclusao(user)" class="acao excluir">Excluir</button>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
   </div>
+  <div v-if="mostrarConfirmacao" class="modal-overlay">
+  <div class="modal">
+    <p>Deseja realmente excluir <strong>{{ usuarioASerDeletado.nome_completo }}</strong>?</p>
+    <div class="modal-botoes">
+      <button class="btn-salvar" @click="deletarUsuarioConfirmado">Sim</button>
+      <button class="btn-cancelar" @click="mostrarConfirmacao = false">Cancelar</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <style scoped>
@@ -378,4 +451,67 @@ function onFileChange(event) {
   color: #c0392b;
   margin-left: 8px;
 }
+
+.mensagem {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+
+.mensagem.sucesso {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.mensagem.erro {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.modal-botoes {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 </style>

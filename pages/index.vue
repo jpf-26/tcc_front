@@ -104,7 +104,6 @@ button:hover {
 </style>
 
 <style>
-/* REMOVE BORDA BRANCA GLOBAL */
 body {
   margin: 0;
   padding: 0;

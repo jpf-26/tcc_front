@@ -2,15 +2,12 @@
   <div class="tela-home">
     <Navbar />
     <NuxtPage />
-
     <div class="conteudo">
       <h1 class="titulo animate-fade-in">Bem-vindo ao TG 02-020</h1>
       <p class="descricao animate-slide-up">
         O Tiro de Guerra é uma instituição militar do Exército Brasileiro, com a missão de formar atiradores e desenvolver o civismo, patriotismo e disciplina entre os jovens. O TG 02-020 atua diretamente na formação de cidadãos mais conscientes, preparados para a vida em sociedade e com espírito de liderança.
       </p>
-
       <img src="/assets/tg_formacao.jpg" alt="Formatura do Tiro de Guerra" class="imagem-banner animate-zoom-in" />
-
       <div class="cards">
         <div class="card animate-fade-in">
           <h2 class="card-titulo">Missão</h2>
@@ -18,7 +15,6 @@
             Formar reservistas com elevados valores éticos e morais, promovendo o civismo e o respeito à pátria, contribuindo para a segurança nacional.
           </p>
         </div>
-
         <div class="card animate-fade-in delay-100">
           <h2 class="card-titulo">Valores</h2>
           <ul class="card-texto">
@@ -29,7 +25,6 @@
             <li>Respeito à autoridade</li>
           </ul>
         </div>
-
         <div class="card animate-fade-in delay-200">
           <h2 class="card-titulo">Atividades</h2>
           <p class="card-texto">
@@ -37,15 +32,12 @@
           </p>
         </div>
       </div>
-
       <div class="info-extra">
         <h2>Por que o TG é importante?</h2>
         <p>
           O Tiro de Guerra desempenha um papel fundamental na formação de jovens líderes e na manutenção da cultura patriótica brasileira. Ao ingressar, o atirador adquire experiência de vida, noção de coletividade e prepara-se tanto para o serviço militar quanto para desafios da vida civil.
         </p>
-
         <img src="/assets/tg_atividade.jpg" alt="Atiradores em atividade física" class="imagem-extra animate-slide-up" />
-
         <h2>Orgulho de vestir a farda</h2>
         <p>
           Ser atirador é motivo de orgulho. É carregar o compromisso com a ordem, a disciplina e o Brasil no coração. Aqui, cada passo dado é uma conquista e cada guarda montada é uma demonstração de responsabilidade.

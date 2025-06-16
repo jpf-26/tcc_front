@@ -2,13 +2,10 @@
   <div class="tela-perfil">
     <Navbar />
     <NuxtPage />
-
     <div class="container">
       <h1 class="titulo">Meu Perfil</h1>
-
       <div v-if="loading" class="text-center">Carregando...</div>
       <div v-else-if="erro" class="text-red-600 text-center">{{ erro }}</div>
-
       <div v-else class="perfil-completo">
         <div class="cabecalho">
           <img :src="usuario.foto || '/default.jpg'" class="foto" alt="Foto de perfil" />
@@ -17,7 +14,6 @@
             <p class="patente">{{ usuario.patente }}</p>
           </div>
         </div>
-
         <section>
           <h3 class="subtitulo">Informações Pessoais</h3>
           <div class="tabela">
@@ -39,7 +35,6 @@
             <div><span>CEP:</span><span>{{ usuario.cep }}</span></div>
           </div>
         </section>
-
         <section>
           <h3 class="subtitulo">Informações Militares</h3>
           <div class="tabela">

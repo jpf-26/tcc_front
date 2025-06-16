@@ -2,18 +2,14 @@
   <div class="tela-notificacoes">
     <Navbar />
     <NuxtPage />
-
     <div class="container">
       <h1 class="titulo">Notificações</h1>
-
       <div v-if="loading" class="text-center">Carregando...</div>
       <div v-else-if="erro" class="text-red-600 text-center">{{ erro }}</div>
-
       <div v-else>
         <div v-if="notificacoes.length === 0" class="text-center">
           Você não possui notificações.
         </div>
-
         <ul class="notificacoes-lista">
           <li
             v-for="n in notificacoes"
@@ -144,7 +140,7 @@ onMounted(async () => {
 
 .icone {
   font-size: 1.4rem;
-  color: #facc15; /* amarelo */
+  color: #facc15; 
   margin-top: 2px;
 }
 
@@ -160,7 +156,7 @@ onMounted(async () => {
 }
 
 .data {
-  font-size: 0.9rem; /* Aumentado de 0.8rem para 0.9rem */
+  font-size: 0.9rem; 
   color: #6b7280;
   margin-top: 4px;
 }
